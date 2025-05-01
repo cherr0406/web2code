@@ -18,5 +18,10 @@ llava = { git = "https://github.com/cherr0406/LLaVA-uv.git" }
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+dev = [
+    "setuptools>=80.1.0",
+]
+
 [tool.setuptools.package-data]
-code_generation = ["py.typed"]
+web2code_wcgb = ["py.typed"]
