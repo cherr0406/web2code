@@ -1,0 +1,22 @@
+[project]
+name = "Web2Code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "llava",
+    "selenium>=4.31.0",
+    "setuptools>=80.1.0",
+    "tqdm>=4.67.1",
+]
+
+[tool.uv.sources]
+llava = { git = "https://github.com/cherr0406/LLaVA-uv.git" }
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+code_generation = ["py.typed"]
