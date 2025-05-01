@@ -23,5 +23,8 @@ dev = [
     "setuptools>=80.1.0",
 ]
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.package-data]
 web2code_wcgb = ["py.typed"]
