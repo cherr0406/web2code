@@ -1,7 +1,7 @@
 import os
 import time
 import argparse
-from gpt4_vision_evaluation import gpt4_vision_evaluation
+from .vision_evaluation import gpt4_vision_evaluation
 
 def main(args):
 
