@@ -5,14 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "llava",
     "selenium>=4.31.0",
     "setuptools>=80.1.0",
     "tqdm>=4.67.1",
 ]
-
-[tool.uv.sources]
-llava = { git = "https://github.com/cherr0406/LLaVA-uv.git" }
 
 [build-system]
 requires = ["setuptools"]
