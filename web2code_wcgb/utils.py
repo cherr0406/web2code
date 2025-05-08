@@ -13,6 +13,27 @@ class ImageEvaluationResult(TypedDict):
     output: str
 
 
+class DetailedScores(TypedDict):
+    layout_consistency: int
+    element_alignment: int
+    proportional_accuracy: int
+    visual_harmony: int
+    color_scheme_match: int
+    aesthetic_resemblance: int
+    font_consistency: int
+    textual_content_match: int
+    numeric_accuracy: int
+    ui_consistency: int
+
+
+class MetricsResult(TypedDict):
+    overall_similarity: float
+    visual_structure: float
+    color_aesthetic: float
+    textual_content: float
+    user_interface: float
+
+
 def encode_image_from_path(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
@@ -69,9 +90,7 @@ def save_results_to_jsonl(
             file.write(json.dumps(result) + "\n")
 
 
-def save_analysis_results(
-    analysis_results: dict[str, float], output_file: Path
-) -> None:
+def save_analysis_results(analysis_results: MetricsResult, output_file: Path) -> None:
     """
     Save analysis results to a file
 

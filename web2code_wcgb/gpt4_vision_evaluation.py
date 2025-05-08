@@ -10,6 +10,7 @@ from .vision_evaluation import (
     evaluate_image_metrics,
     fetch_api_response,
     generate_responses,
+    get_individual_scores,
 )
 
 
@@ -46,6 +47,7 @@ def gpt4_vision_evaluation(gt_output_dir, pred_output_dir, output_dir, api_key):
     )
 
     save_results_to_jsonl(results, output_jsonl_path)
-    analysis_results = evaluate_image_metrics(results)
+    individual_results = get_individual_scores(results)
+    analysis_results = evaluate_image_metrics(individual_results)
     analysis_output_file = output_dir / "vision_evaluation_summary.log"
     save_analysis_results(analysis_results, analysis_output_file)

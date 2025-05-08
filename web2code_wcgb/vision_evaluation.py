@@ -4,7 +4,7 @@ from typing import Callable
 import requests
 from PIL import Image
 
-from .utils import ImageEvaluationResult, encode_image
+from .utils import DetailedScores, ImageEvaluationResult, MetricsResult, encode_image
 
 # Model constants
 MODEL_GPT4_TURBO = "gpt-4-turbo"
@@ -172,8 +172,8 @@ def generate_responses(
 
 
 def evaluate_image_metrics(
-    results: dict[str, ImageEvaluationResult],
-) -> dict[str, float]:
+    individual_results: dict[str, DetailedScores],
+) -> MetricsResult:
     """
     Evaluate the image metrics based on the results.
 
@@ -189,24 +189,23 @@ def evaluate_image_metrics(
     textual_content = 0.0
     user_interface = 0.0
 
-    for image_id, data in results.items():
-        output = data["output"]
-
-        try:
-            output_list = list(
-                map(int, output.replace("\n", ",").strip(", ").split(","))
-            )
-            if len(output_list) != 10:
-                print(f"Failed to process image: {image_id}")
-                continue
-            total_images_processed += 1
-            vis_struct += sum(output_list[:4]) / 4
-            color_aesthetic += sum(output_list[4:6]) / 2
-            textual_content += sum(output_list[6:9]) / 3
-            user_interface += output_list[9]
-        except Exception as e:
-            print(f"Exception: {e}\n")
-            continue
+    for output in individual_results.values():
+        total_images_processed += 1
+        vis_struct += (
+            output["layout_consistency"]
+            + output["element_alignment"]
+            + output["proportional_accuracy"]
+            + output["visual_harmony"]
+        ) / 4
+        color_aesthetic += (
+            output["color_scheme_match"] + output["aesthetic_resemblance"]
+        ) / 2
+        textual_content += (
+            output["font_consistency"]
+            + output["textual_content_match"]
+            + output["numeric_accuracy"]
+        ) / 3
+        user_interface += output["ui_consistency"]
 
     if total_images_processed == 0:
         return {
@@ -232,3 +231,46 @@ def evaluate_image_metrics(
         "textual_content": textual_content,
         "user_interface": user_interface,
     }
+
+
+def get_individual_scores(
+    results: dict[str, ImageEvaluationResult],
+) -> dict[str, DetailedScores]:
+    """
+    Generate detailed scores for each sample based on the results.
+
+    Args:
+        results: Dictionary containing the results with image_id as keys
+
+    Returns:
+        Dictionary containing the detailed scores for each sample
+    """
+    individual_scores: dict[str, DetailedScores] = {}
+
+    for image_id, data in results.items():
+        output = data["output"]
+
+        try:
+            output_list = list(
+                map(int, output.replace("\n", ",").strip(", ").split(","))
+            )
+            if len(output_list) != 10:
+                print(f"Failed to process image: {image_id}")
+                continue
+            individual_scores[image_id] = DetailedScores(
+                layout_consistency=output_list[0],
+                element_alignment=output_list[1],
+                proportional_accuracy=output_list[2],
+                visual_harmony=output_list[3],
+                color_scheme_match=output_list[4],
+                aesthetic_resemblance=output_list[5],
+                font_consistency=output_list[6],
+                textual_content_match=output_list[7],
+                numeric_accuracy=output_list[8],
+                ui_consistency=output_list[9],
+            )
+        except Exception as e:
+            print(f"Exception: {e}\n")
+            continue
+
+    return individual_scores
