@@ -1,6 +1,16 @@
-import os
+from pathlib import Path
 
-from .vision_evaluation import generate_responces, read_jsonl_and_get_outputs
+from .utils import (
+    get_processed_data,
+    normalize_input,
+    save_analysis_results,
+    save_results_to_jsonl,
+)
+from .vision_evaluation import (
+    evaluate_image_metrics,
+    fetch_api_response,
+    generate_responses,
+)
 
 
 def gpt4_vision_evaluation(gt_output_dir, pred_output_dir, output_dir, api_key):
@@ -16,16 +26,26 @@ def gpt4_vision_evaluation(gt_output_dir, pred_output_dir, output_dir, api_key):
     """
 
     # Create a JSONL file to store the outputs
-    output_jsonl_path = os.path.join(output_dir, "gpt4_vision_evaluation_output.jsonl")
+    output_dir_path = Path(output_dir)
+    output_jsonl_path = output_dir_path / "gpt4_vision_evaluation_output.jsonl"
+    output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    # Get the processed data from the JSONL file
+    processed_data = get_processed_data(output_jsonl_path)
 
     # Generate responses using GPT4
-    generate_responces(pred_output_dir, gt_output_dir, output_jsonl_path, api_key)
+    pred_files = normalize_input(pred_output_dir)
+    gt_files = normalize_input(gt_output_dir)
+    results = generate_responses(
+        pred_files,
+        gt_files,
+        processed_data,
+        fetch_response_func=lambda gt, pred: fetch_api_response(
+            gt, pred, api_key=api_key
+        ),
+    )
 
-    # Read the JSONL file and get the outputs
-    read_jsonl_and_get_outputs(
-        output_jsonl_path
-    )  # Read the JSONL file and get the outputs
-    read_jsonl_and_get_outputs(output_jsonl_path)
+    save_results_to_jsonl(results, output_jsonl_path)
+    analysis_results = evaluate_image_metrics(results)
+    analysis_output_file = output_dir / "vision_evaluation_summary.log"
+    save_analysis_results(analysis_results, analysis_output_file)
