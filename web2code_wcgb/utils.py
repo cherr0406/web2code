@@ -50,6 +50,8 @@ def encode_image(image: Image.Image) -> str:
         Base64 encoded string of the image
     """
     buffered = io.BytesIO()
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
     image.save(buffered, format="JPEG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
