@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Callable
 
@@ -5,6 +6,8 @@ import requests
 from PIL import Image
 
 from .utils import DetailedScores, ImageEvaluationResult, MetricsResult, encode_image
+
+logger = logging.getLogger(__name__)
 
 # Model constants
 MODEL_GPT4_TURBO = "gpt-4-turbo"
@@ -105,7 +108,7 @@ def fetch_api_response(
             response.raise_for_status()
             return response.content.decode("utf-8")
         except Exception as e:
-            print(f"Exception: {e}\n")
+            logger.debug(f"Exception: {e}\n")
             attempt += 1
             time.sleep(retry_delay)
             continue
@@ -138,25 +141,25 @@ def generate_responses(
     # Process each pair of images
     for base_name, pred_image in pred_files.items():
         if base_name in results:
-            print(f"Image {base_name} already processed.\n")
+            logger.debug(f"Image {base_name} already processed.\n")
             continue
 
         # Check if we have corresponding ground truth
         if base_name not in gt_files:
-            print(f"Ground truth image for {base_name} not found.")
+            logger.debug(f"Ground truth image for {base_name} not found.")
             continue
 
         gt_image = gt_files[base_name]
 
-        print(f"Processing image {base_name}...")
+        logger.debug(f"Processing image {base_name}...")
 
         # Encoding images to base64
-        print(f"Encoding image {base_name}...")
+        logger.debug(f"Encoding image {base_name}...")
         try:
             pred_base64_image = encode_image(pred_image)
             gt_base64_image = encode_image(gt_image)
         except Exception as e:
-            print(f"Error encoding image {base_name}: {e}")
+            logger.debug(f"Error encoding image {base_name}: {e}")
             continue
 
         try:
@@ -164,9 +167,9 @@ def generate_responses(
 
             # Add to results
             results[base_name] = {"image_id": base_name, "output": content_str}
-            print(f"Image {base_name} processed successfully.\n")
+            logger.debug(f"Image {base_name} processed successfully.\n")
         except Exception as e:
-            print(f"Failed to process image {base_name}: {e}\n")
+            logger.debug(f"Failed to process image {base_name}: {e}\n")
 
     return results
 
@@ -255,7 +258,7 @@ def get_individual_scores(
                 map(int, output.replace("\n", ",").strip(", ").split(","))
             )
             if len(output_list) != 10:
-                print(f"Failed to process image: {image_id}")
+                logger.debug(f"Failed to process image: {image_id}")
                 continue
             individual_scores[image_id] = DetailedScores(
                 layout_consistency=output_list[0],
@@ -270,7 +273,7 @@ def get_individual_scores(
                 ui_consistency=output_list[9],
             )
         except Exception as e:
-            print(f"Exception: {e}\n")
+            logger.debug(f"Exception: {e}\n")
             continue
 
     return individual_scores
