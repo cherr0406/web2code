@@ -413,7 +413,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "setuptools" },
     { name = "types-requests" },
     { name = "types-tqdm" },
 ]
@@ -429,7 +428,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "setuptools", specifier = ">=80.1.0" },
     { name = "types-requests", specifier = ">=2.32.0.20250328" },
     { name = "types-tqdm", specifier = ">=4.67.0.20250516" },
 ]
