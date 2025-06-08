@@ -4,6 +4,7 @@ from typing import Callable
 
 import requests
 from PIL import Image
+from tqdm import tqdm
 
 from .utils import DetailedScores, ImageEvaluationResult, MetricsResult, encode_image
 
@@ -120,6 +121,7 @@ def generate_responses(
     gt_files: dict[str, Image.Image],
     cached_processed_data: dict[str, ImageEvaluationResult] | None = None,
     fetch_response_func: Callable[[str, str], str] = fetch_api_response,
+    tqdm_enabled: bool = True,
 ) -> dict[str, ImageEvaluationResult]:
     """
     Generate evaluation responses for comparison between predicted and ground truth images.
@@ -138,8 +140,15 @@ def generate_responses(
 
     results = cached_processed_data.copy()
 
+    # Prepare iterator with or without tqdm
+    pred_files_iterator = (
+        tqdm(list(pred_files.items()), desc="Evaluating images")
+        if tqdm_enabled
+        else pred_files.items()
+    )
+
     # Process each pair of images
-    for base_name, pred_image in pred_files.items():
+    for base_name, pred_image in pred_files_iterator:
         if base_name in results:
             logger.debug(f"Image {base_name} already processed.\n")
             continue
